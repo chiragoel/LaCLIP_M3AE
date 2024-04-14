@@ -130,8 +130,8 @@ def train(args, model, device, train_data, dev_data, test_data, processor):
                      'micro_test_precision': test_precision_,'micro_test_recall': test_recall_})
             logging.info("i_epoch is {}, test_acc is {}, macro_test_f1 is {}, macro_test_precision is {}, macro_test_recall is {}, micro_test_f1 is {}, micro_test_precision is {}, micro_test_recall is {}".format(i_epoch, test_acc, test_f1, test_precision, test_recall, test_f1_, test_precision_, test_recall_))
 
-        # torch.cuda.empty_cache()
-        torch.mps.empty_cache()
+        torch.cuda.empty_cache()
+        #torch.mps.empty_cache()
     logger.info('Train done')
 
 

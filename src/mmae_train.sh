@@ -1,9 +1,0 @@
-python3 main_m3ae.py  --text_name text_json_final --weight_decay 0.05 --train_batch_size 8 --dev_batch_size 8 --learning_rate 1e-6  --num_train_epochs 10 --max_grad_norm 5 --dropout_rate 0.2 --optimizer_name adam --text_size 256 --image_size 768 --warmup_proportion 0.2 --device 0 --model_type base --layers 12 --output_dir ./MMAE_exps/exp1> ./logs/MMAE_base_12_exp1.log 2>&1
-
-python3 main_m3ae.py  --text_name text_json_final --weight_decay 0.05 --train_batch_size 8 --dev_batch_size 8 --learning_rate 1e-6  --num_train_epochs 10 --max_grad_norm 5 --dropout_rate 0.2 --optimizer_name adam --text_size 256 --image_size 768 --warmup_proportion 0.2 --device 0 --model_type base --layers 3 --output_dir ./MMAE_exps/exp2> ./logs/MMAE_base_3_exp2.log 2>&1
-
-python3 main_m3ae.py  --text_name text_json_final --weight_decay 0.05 --train_batch_size 8 --dev_batch_size 8 --learning_rate 1e-6  --num_train_epochs 10 --max_grad_norm 5 --dropout_rate 0.2 --optimizer_name adam --text_size 256 --image_size 768 --warmup_proportion 0.2 --device 0 --model_type small --layers 12 --output_dir ./MMAE_exps/exp3> ./logs/MMAE_small_12_exp3.log 2>&1
-
-python3 main_m3ae.py  --text_name text_json_final --weight_decay 0.05 --train_batch_size 8 --dev_batch_size 8 --learning_rate 1e-6  --num_train_epochs 10 --max_grad_norm 5 --dropout_rate 0.2 --optimizer_name adam --text_size 256 --image_size 768 --warmup_proportion 0.2 --device 0 --model_type small --layers 3 --output_dir ./MMAE_exps/exp4> ./logs/MMAE_small_12_exp4.log 2>&1
-
-python3 main_m3ae.py  --text_name text_json_final --weight_decay 0.05 --train_batch_size 8 --dev_batch_size 8 --learning_rate 1e-6  --num_train_epochs 10 --max_grad_norm 5 --dropout_rate 0.2 --optimizer_name adam --text_size 256 --image_size 768 --warmup_proportion 0.2 --device 0 --model_type base --layers 6 --output_dir ./MMAE_exps/exp5> ./logs/MMAE_base_6_exp5.log 2>&1

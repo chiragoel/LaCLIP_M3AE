@@ -122,33 +122,18 @@ class LACLIP(nn.Module):
             'ViT-B-32', # check on the patch=>224*224
             '',
             precision='amp',
-            device=torch.device('mps'),
+            device=torch.device('cuda'),
             jit=False,
             force_quick_gelu=True,
             pretrained_image=False
         )
 
-        clip_path = "/Users/parnika./Downloads/MMSD2.0-laclip-integ-dev/laion400m_clip.pt"
-        ckpt = torch.load(clip_path, map_location='cpu')
-        # state_dict = OrderedDict()
-        # for k, v in ckpt['state_dict'].items():
-        #     state_dict[k.replace('module.', '')] = v
+        #clip_path = "/Users/parnika./Downloads/MMSD2.0-laclip-integ-dev/laion400m_clip.pt"
+        laclip_path = "/Users/parnika./Downloads/MMSD2.0-laclip-integ-dev/laion400m_laclip.pt"
+        ckpt = torch.load(laclip_path, map_location='cpu')
         self.model = model
-        # self.model.eval()
-        # self.model = getattr(laclip_model_arch, "CLIP_VITB32")()
-        # self.model.cuda()
+        self.model.cuda()
         self.model.load_state_dict(ckpt['state_dict'], strict=True)
-
-
-        # laclip_path = "/Users/parnika./Downloads/MMSD2.0-laclip-integ-dev/laion400m_laclip.pt"
-        # self.model = getattr(laclip_model_arch, "CLIP_VITB32")()
-        # self.model.load_state_dict(torch.load(laclip_path), strict=False)
-
-        #***************Need to check why freezing pretrained weights not working well or something is wrong**********#
-
-        # self.model.eval()
-        # for param in self.model.parameters():
-        #     param.requires_grad = False
 
         self.config = BertConfig.from_pretrained("bert-base-uncased")
         self.config.hidden_size = 512
@@ -175,100 +160,6 @@ class LACLIP(nn.Module):
 
         self.loss_fct = nn.CrossEntropyLoss()
         self.att = nn.Linear(args.text_size, 1, bias=False)
-
-    # def build_model(self, state_dict: dict):
-    #     vit = "visual.proj" in state_dict
-    #
-    #     if vit:
-    #         vision_width = state_dict["visual.conv1.weight"].shape[0]
-    #         vision_layers = len(
-    #             [k for k in state_dict.keys() if k.startswith("visual.") and k.endswith(".attn.in_proj_weight")])
-    #         vision_patch_size = state_dict["visual.conv1.weight"].shape[-1]
-    #         grid_size = round((state_dict["visual.positional_embedding"].shape[0] - 1) ** 0.5)
-    #         image_resolution = vision_patch_size * grid_size
-    #     else:
-    #         counts: list = [len(set(k.split(".")[2] for k in state_dict if k.startswith(f"visual.layer{b}"))) for b in
-    #                         [1, 2, 3, 4]]
-    #         vision_layers = tuple(counts)
-    #         vision_width = state_dict["visual.layer1.0.conv1.weight"].shape[0]
-    #         output_width = round((state_dict["visual.attnpool.positional_embedding"].shape[0] - 1) ** 0.5)
-    #         vision_patch_size = None
-    #         assert output_width ** 2 + 1 == state_dict["visual.attnpool.positional_embedding"].shape[0]
-    #         image_resolution = output_width * 32
-    #
-    #     embed_dim = state_dict["text_projection"].shape[1]
-    #     context_length = state_dict["positional_embedding"].shape[0]
-    #     vocab_size = state_dict["token_embedding.weight"].shape[0]
-    #     transformer_width = state_dict["ln_final.weight"].shape[0]
-    #     transformer_heads = transformer_width // 64
-    #     transformer_layers = len(set(k.split(".")[2] for k in state_dict if k.startswith("transformer.resblocks")))
-    #
-    #     model = self.model(
-    #         embed_dim,
-    #         image_resolution, vision_layers, vision_width, vision_patch_size,
-    #         context_length, vocab_size, transformer_width, transformer_heads, transformer_layers
-    #     )
-    #
-    #     for key in ["input_resolution", "context_length", "vocab_size"]:
-    #         if key in state_dict:
-    #             del state_dict[key]
-
-    # def forward(self, inputs, labels):
-    #     # output = self.model(inputs['pixel_values'], inputs['input_ids'])  #output_attention called but not used in MV_CLIP
-    #     output = self.model(inputs['pixel_values'], inputs['input_ids'],
-    #                         inputs['attention_mask'])  # output_attention called but not used in MV_CLIP
-    #     text_features = output['text_model_output']['last_hidden_state']
-    #     image_features = output['vision_model_output']['last_hidden_state']
-    #     text_feature = output['text_model_output']['pooler_output']
-    #     image_feature = output['vision_model_output']['pooler_output']
-    #     text_feature = self.text_linear(text_feature)
-    #     image_feature = self.image_linear(image_feature)
-    #
-    #     text_embeds = self.model.text_projection(text_features)
-    #     image_embeds = self.model.visual_projection(image_features)
-    #
-    #     input_embeds = torch.cat((image_embeds, text_embeds), dim=1)
-    #     attention_mask = torch.cat(
-    #         (torch.ones(text_features.shape[0], 50).to(text_features.device), inputs['attention_mask']), dim=-1)
-    #     extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
-    #     extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
-    #     extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
-    #     fuse_hiddens, all_attentions = self.trans(input_embeds, extended_attention_mask,
-    #                                               output_all_encoded_layers=False)
-    #     fuse_hiddens = fuse_hiddens[-1]
-    #     new_text_features = fuse_hiddens[:, 50:, :]
-    #     new_text_feature = new_text_features[
-    #         torch.arange(new_text_features.shape[0], device=inputs['input_ids'].device), inputs['input_ids'].to(
-    #             torch.int).argmax(dim=-1)
-    #     ]
-    #
-    #     new_image_feature = fuse_hiddens[:, 0, :].squeeze(1)
-    #
-    #     text_weight = self.att(new_text_feature)
-    #     image_weight = self.att(new_image_feature)
-    #     att = nn.functional.softmax(torch.stack((text_weight, image_weight), dim=-1), dim=-1)
-    #     tw, iw = att.split([1, 1], dim=-1)
-    #     fuse_feature = tw.squeeze(1) * new_text_feature + iw.squeeze(1) * new_image_feature
-    #
-    #     logits_fuse = self.classifier_fuse(fuse_feature)
-    #     logits_text = self.classifier_text(text_feature)
-    #     logits_image = self.classifier_image(image_feature)
-    #
-    #     fuse_score = nn.functional.softmax(logits_fuse, dim=-1)
-    #     text_score = nn.functional.softmax(logits_text, dim=-1)
-    #     image_score = nn.functional.softmax(logits_image, dim=-1)
-    #
-    #     score = fuse_score + text_score + image_score
-    #
-    #     outputs = (score,)
-    #     if labels is not None:
-    #         loss_fuse = self.loss_fct(logits_fuse, labels)
-    #         loss_text = self.loss_fct(logits_text, labels)
-    #         loss_image = self.loss_fct(logits_image, labels)
-    #         loss = loss_fuse + loss_text + loss_image
-    #
-    #         outputs = (loss,) + outputs
-    #     return outputs
 
     def forward(self, inputs, labels):
         # output = self.model(inputs['pixel_values'], inputs['input_ids'])  #output_attention called but not used in MV_CLIP

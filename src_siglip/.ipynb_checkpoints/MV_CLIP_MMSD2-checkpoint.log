@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/zeus/MMSD2.0/src/main.py", line 3, in <module>
+    from model import MV_CLIP
+  File "/home/zeus/MMSD2.0/src/model.py", line 1, in <module>
+    from transformers import CLIPModel,BertConfig
+ModuleNotFoundError: No module named 'transformers'

@@ -55,11 +55,11 @@ def seed_everything(seed=42):
 
 def main():
     args = set_args()
-    # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     # os.environ["CUDA_VISIBLE_DEVICES"] = args.device
-    # device = torch.device("cuda" if torch.cuda.is_available() and int(args.device) >= 0 else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() and int(args.device) >= 0 else "cpu")
 
-    device = torch.device("mps")
+    #device = torch.device("mps")
 
     seed_everything(args.seed)
     wandb.login(key='')

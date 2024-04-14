@@ -68,9 +68,9 @@ def train(args, model, device, train_data, dev_data, test_data, processor):
                     {"params": model.model.parameters(),"lr": args.clip_learning_rate}
                     ], lr=args.learning_rate, weight_decay=args.weight_decay)
 
-            # scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
-            #                                         num_training_steps=total_steps)
-            scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
+            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
+                                                     num_training_steps=total_steps)
+            #scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
                                                     num_training_steps=total_steps)
         else:
             optimizer = optimizer = AdamW(model.parameters(), lr=args.learning_rate, eps=args.adam_epsilon, weight_decay=args.weight_decay)

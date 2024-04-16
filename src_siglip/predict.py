@@ -1,5 +1,5 @@
 import os
-from model import CLIPClassificationModel_transformer
+from model import MV_CLIP
 from transformers import CLIPProcessor
 from torch.utils.data import DataLoader
 import torch
@@ -9,11 +9,13 @@ from tqdm import tqdm
 import json
 import numpy as np
 from sklearn import metrics
+import pandas as pd
 
 
-def predict(args, model, device, data, processor, pre = None):
+def predict(args, model, device, data, processor, pre = None, csv = None, metric_csv = None):
 
     data_loader = DataLoader(data, batch_size=args.test_batch_size, collate_fn=MyDataset.collate_func,shuffle=False)
+    print("dataloder : ", len(data_loader))
     n_correct, n_total = 0, 0
     t_targets_all, t_outputs_all = None, None
 
@@ -49,7 +51,8 @@ def predict(args, model, device, data, processor, pre = None):
             label = t_targets_all.cpu().numpy().tolist()
             for image_, text_, label_, predict_, logi_ in zip(image, text,label, predict, logit):
                 data.append({'image_id':image_, 'text':text_, 'label':label_, 'predict':predict_, 'logit':logi_}) 
-        json.dump({'data': data}, fout)            
+        json.dump({'data': data}, fout)
+        df = pd.DataFrame(data=data).to_csv(csv, index=False)           
         
         acc = n_correct / n_total
         f1 = metrics.f1_score(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu())
@@ -59,12 +62,14 @@ def predict(args, model, device, data, processor, pre = None):
         precision_ =  metrics.precision_score(t_targets_all.cpu(),torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 1],average='macro')
         recall_ = metrics.recall_score(t_targets_all.cpu(),torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 1],average='macro')
         print("test_acc is {}, macro_test_f1 is {}, macro_test_precision is {}, macro_test_recall is {}, micro_test_f1 is {}, micro_test_precision is {}, micro_test_recall is {}".format(acc, f1_, precision_, recall_, f1, precision, recall))
-
+        metrics_result = dict(zip(["test_acc", "macro_test_f1", "macro_test_precision", "macro_test_recall", "micro_test_f1", "micro_test_precision", "micro_test_recall"], [acc, f1_, precision_, recall_, f1, precision, recall]))
+        df_metrics = pd.DataFrame(data=metrics_result,index=range(7)).to_csv(metric_csv, index=False)
 
 
 def set_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', default='0', type=str, help='device number')
+    parser.add_argument('--model', default='MV_CLIP', type=str, help='the model name', choices=['MV_CLIP','LACLIP','SIGLIP'])
     parser.add_argument('--max_len', type=int, default=77, help='max length of text')
     parser.add_argument('--text_size', default=512, type=int, help='text hidden size')
     parser.add_argument('--image_size', default=768, type=int, help='image hidden size')
@@ -73,7 +78,10 @@ def set_args():
     parser.add_argument('--test_batch_size', type=int, default=8, help='batch size for text phase')
     parser.add_argument('--model_path', type=str, default="../output_dir/MV_CLIP", help='save model dpath')
     parser.add_argument('--save_file', type=str, default="result.json", help='save result path')
+    parser.add_argument('--save_csv_file', type=str, default="result.csv", help='save result csv path')
+    parser.add_argument('--save_metrics_csv_file', type=str, default="metrics_result.csv", help='save metrics csv path')
     parser.add_argument('--text_name', default='text_json_final', type=str, help='the text data folder name')
+    parser.add_argument('--mode', default='test', type=str, help='json file to build dataloader ')
     parser.add_argument('--layers', default=3, type=int, help='number of layers of transformers')
     parser.add_argument('--simple_linear', default=False, type=bool, help='linear implementation choice')
     return parser.parse_args()
@@ -85,16 +93,17 @@ def main():
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device
     device = torch.device("cuda" if torch.cuda.is_available() and int(args.device) >= 0 else "cpu")
 
-    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-    model = CLIPClassificationModel_transformer(args)
+    if args.model == 'MV_CLIP':
+        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        model = MV_CLIP(args)
 
-    test_data = MyDataset(mode='test', text_name=args.text_name, limit=None)
-
-    model.load_state_dict(torch.load(os.path.join(args.model_path, "model.pt"), map_location="cpu"))
+    test_data = MyDataset(mode="aug_test", text_name=args.text_name, limit=None)
+    # model.load_state_dict(torch.load(os.path.join(args.model_path, "model.pt"), map_location="cpu"))
+    model.load_state_dict(torch.load(args.model_path, map_location="cpu"))
     model.to(device)
     model.eval()
 
-    predict(args, model, device, test_data, processor, pre=args.save_file)
+    predict(args, model, device, test_data, processor, pre=args.save_file, csv=args.save_csv_file, metric_csv=args.save_metrics_csv_file)
 
 
 if __name__ == '__main__':

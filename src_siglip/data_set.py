@@ -18,7 +18,7 @@ class MyDataset(Dataset):
     def load_data(self, mode, limit):
         cnt = 0
         data_set=dict()
-        if mode in ["train"]:
+        if mode in ["train", "train_aug_total", "train_aug_random", "aug_test"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')
             datas = json.load(f1)
             for data in datas:

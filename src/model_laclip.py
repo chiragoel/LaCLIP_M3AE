@@ -1,5 +1,5 @@
 from transformers import BertConfig
-import laclip_models as models
+import open_clip.src.open_clip as oc
 from transformers.models.bert.modeling_bert import BertLayer
 import torch.nn as nn
 import torch
@@ -29,13 +29,15 @@ class MV_LaCLIP(nn.Module):
     def __init__(self, args, map_location='cpu', device='cpu'):
         super(MV_LaCLIP, self).__init__()
         
-        self.model = getattr(models, 'CLIP_VITB32')()
-        self.model.load_state_dict(torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location), strict=False)
+        self.model = oc.factory.create_model('ViT-B-32')
+        chkt = torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location)
+        self.model.load_state_dict(chkt['state_dict'], strict=True)
         self.model.to(device)
         self.config = BertConfig.from_pretrained("bert-base-uncased")
         self.config.hidden_size = 512
         self.config.num_attention_heads = 8
         self.trans = MultimodalEncoder(self.config, layer_number=args.layers)
+        self.trans.to(device)
         if args.simple_linear:
             self.text_linear =  nn.Linear(args.text_size, args.text_size)
             self.image_linear =  nn.Linear(args.image_size, args.image_size)
@@ -61,11 +63,11 @@ class MV_LaCLIP(nn.Module):
         self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, image, text, padding_mask, input_ids, labels):
-        output = self.model(image, text, key_pad_mask=padding_mask)
-        text_features = output['text_embeds']
-        image_features = output['image_embeds']
-        text_feature = output['text_embed']
-        image_feature = output['image_embed']
+        output = self.model(image, text) #, key_pad_mask=padding_mask
+        text_features = output['text_features']
+        image_features = output['image_features']
+        text_feature = output['text_feature']
+        image_feature = output['image_feature']
         text_feature = self.text_linear(text_feature)
         image_feature = self.image_linear(image_feature)
 

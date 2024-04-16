@@ -45,7 +45,7 @@ def train(args, model, device, train_data, dev_data, test_data):
     elif args.optimizer_name == 'adam':
         print('Use AdamW Optimizer for Training.')
         from transformers.optimization import AdamW, get_linear_schedule_with_warmup
-        if args.model == 'MV_LaCLIP':
+        if args.model == 'MV_MMAE_LaCLIP':
             clip_params = list(map(id, model.model.parameters()))
             base_params = filter(lambda p: id(p) not in clip_params, model.parameters())
             optimizer = AdamW([
@@ -73,7 +73,7 @@ def train(args, model, device, train_data, dev_data, test_data):
 
         for step, batch in enumerate(iter_bar):
             text_list, image_list, label_list, padding_mask, id_list = batch
-            if args.model == 'MV_LaCLIP':
+            if args.model == 'MV_MMAE_LaCLIP':
                 batch_image, batch_text, batch_padding_mask = image_list.to(device), text_list.to(device), padding_mask.to(device)
                 labels = torch.tensor(label_list).to(device)
                 batch_id = torch.tensor(id_list).to(device)
@@ -101,7 +101,7 @@ def train(args, model, device, train_data, dev_data, test_data):
             if not os.path.exists(path_to_save):
                 os.mkdir(path_to_save)
             model_to_save = (model.module if hasattr(model, "module") else model)
-            torch.save(model_to_save.state_dict(), os.path.join(path_to_save, 'model.pt'))
+            torch.save(model_to_save.state_dict(), os.path.join(path_to_save, f'model_{i_epoch}.pt'))
 
             test_acc, test_f1,test_precision,test_recall = evaluate_acc_f1(args, model, device, test_data,macro = True, mode='test')
             _, test_f1_,test_precision_,test_recall_ = evaluate_acc_f1(args, model, device, test_data, mode='test')
@@ -125,11 +125,10 @@ def evaluate_acc_f1(args, model, device, data, macro=False,pre = None, mode='tes
         with torch.no_grad():
             for i_batch, t_batch in enumerate(data_loader):
                 text_list, image_list, label_list, padding_mask, id_list = t_batch
-                if args.model == 'MV_LaCLIP':
+                if args.model == 'MV_MMAE_LaCLIP':
                     batch_image, batch_text, batch_padding_mask = image_list.to(device), text_list.to(device), padding_mask.to(device)
                     labels = torch.tensor(label_list).to(device)
                     batch_id = torch.tensor(id_list).to(device)
-                
                 t_targets = labels
                 loss, t_outputs = model(batch_image, batch_text, batch_padding_mask, batch_id, labels=labels)
                 sum_loss += loss.item()

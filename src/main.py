@@ -1,8 +1,8 @@
 import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = '2'
-from model import MV_CLIP
-from train import train
-from data_set import MyDataset
+from model_laclip import MV_LaCLIP
+from train_laclip import train
+from data_set_laclip import MyDataset
 import torch
 import argparse
 import random
@@ -16,7 +16,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 def set_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', default='1', type=str, help='device number')
-    parser.add_argument('--model', default='MV_CLIP', type=str, help='the model name', choices=['MV_CLIP'])
+    parser.add_argument('--model', default='MV_CLIP', type=str, help='the model name', choices=['MV_CLIP', 'MV_LaCLIP'])
     parser.add_argument('--text_name', default='text_json_final', type=str, help='the text data folder name')
     parser.add_argument('--simple_linear', default=False, type=bool, help='linear implementation choice')
     parser.add_argument('--num_train_epochs', default=10, type=int, help='number of train epoched')
@@ -61,7 +61,7 @@ def main():
     seed_everything(args.seed)
 
     wandb.init(
-        project="MMSD_Team",
+        project="LaClip_MMSD_chirag",
         notes="mm",
         tags=["mm"],
         config=vars(args),
@@ -75,13 +75,20 @@ def main():
     if args.model == 'MV_CLIP':
         processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
         model = MV_CLIP(args)
+    elif args.model == 'MV_LaCLIP':
+        map_location = device + ':0' if device == 'cuda' else device
+        model = MV_LaCLIP(args,map_location, device)
     else:
         raise RuntimeError('Error model name!')
 
     model.to(device)
     wandb.watch(model, log="all")
+    print('Device', device)
 
-    train(args, model, device, train_data, dev_data, test_data, processor)
+    if args.model == 'MV_CLIP':
+        train(args, model, device, train_data, dev_data, test_data, processor)
+    elif args.model == 'MV_LaCLIP':
+        train(args, model, device, train_data, dev_data, test_data)
 
 
 

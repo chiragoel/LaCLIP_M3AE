@@ -43,7 +43,7 @@ class ResidualAttentionBlock(nn.Module):
         return self.attn(x, x, x, need_weights=False, key_padding_mask=key_pad_mask, attn_mask=None)[0]
 
     def forward(self, x, key_pad_mask):
-        x = x + self.attn(x, x, x, need_weights=False, key_padding_mask=key_pad_mask, attn_mask=None)[0]
+        x = x + self.attention(x, key_pad_mask)
         x = x + self.mlp(self.ln_2(x))
         return x
 

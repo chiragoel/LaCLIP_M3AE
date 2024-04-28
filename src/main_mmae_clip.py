@@ -17,7 +17,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 def set_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', default='0', type=str, help='device number')
-    parser.add_argument('--model', default='MV_MMAE_CLIP', type=str, help='the model name', choices=['MV_CLIP'])
+    parser.add_argument('--model', default='MV_MMAE_CLIP', type=str, help='the model name', choices=['MV_CLIP','MV_MMAE_CLIP'])
     parser.add_argument('--text_name', default='text_json_final', type=str, help='the text data folder name')
     parser.add_argument('--simple_linear', default=False, type=bool, help='linear implementation choice')
     parser.add_argument('--num_train_epochs', default=10, type=int, help='number of train epoched')
@@ -64,7 +64,7 @@ def main():
     seed_everything(args.seed)
 
     wandb.init(
-        project="MMAE_CLIP_Team",
+        project="MMAE_CLIP_chirag",
         notes="mm",
         tags=["mm"],
         config=vars(args),

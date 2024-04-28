@@ -144,18 +144,18 @@ class MyDataset(Dataset):
                 if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
                     data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
                     cnt += 1
-            datas_augs = json.load(f2)
-            for data in datas_augs:
-                if limit != None and cnt >= limit:
-                    break
+#             datas_augs = json.load(f2)
+#             for data in datas_augs:
+#                 if limit != None and cnt >= limit:
+#                     break
 
-                image = data['image_id']
-                sentence = data['text']
-                label = data['label']
+#                 image = data['image_id']
+#                 sentence = data['text']
+#                 label = data['label']
  
-                if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
-                    data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
-                    cnt += 1
+#                 if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
+#                     data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
+#                     cnt += 1
                     
         
         if mode in ["test","valid"]:
@@ -189,20 +189,20 @@ class MyDataset(Dataset):
 
     def __len__(self):
         return len(self.data.keys())
-#     @staticmethod
-#     def collate_func(batch_data):
-#         batch_size = len(batch_data)
+    @staticmethod
+    def collate_func(batch_data):
+        batch_size = len(batch_data)
  
-#         if batch_size == 0:
-#             return {}
+        if batch_size == 0:
+            return {}
 
-#         text_list = []
-#         image_list = []
-#         label_list = []
-#         id_list = []
-#         for instance in batch_data:
-#             text_list.append(instance[0])
-#             image_list.append(instance[1])
-#             label_list.append(instance[2])
-#             id_list.append(instance[3])
-#         return text_list, image_list, label_list, id_list
+        text_list = []
+        image_list = []
+        label_list = []
+        id_list = []
+        for instance in batch_data:
+            text_list.append(instance[0])
+            image_list.append(instance[1])
+            label_list.append(instance[2])
+            id_list.append(instance[3])
+        return text_list, image_list, label_list, id_list

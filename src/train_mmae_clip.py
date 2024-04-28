@@ -19,9 +19,8 @@ def train(args, model, device, train_data, dev_data, test_data, processor):
         os.mkdir(args.output_dir)
 
     train_loader = DataLoader(dataset=train_data,
-                              batch_size=args.train_batch_size,
-                              collate_fn=MyDataset.collate_func,
-                              shuffle=True)
+                              batch_size=args.train_batch_size,collate_fn=MyDataset.collate_func,
+                              shuffle=True, num_workers=4)
     total_steps = int(len(train_loader) * args.num_train_epochs)
     model.to(device)
 
@@ -101,7 +100,7 @@ def train(args, model, device, train_data, dev_data, test_data, processor):
             if not os.path.exists(path_to_save):
                 os.mkdir(path_to_save)
             model_to_save = (model.module if hasattr(model, "module") else model)
-            torch.save(model_to_save.state_dict(), os.path.join(path_to_save, 'model.pt'))
+            torch.save(model_to_save.state_dict(), os.path.join(path_to_save, f'model_{i_epoch}.pt'))
 
             test_acc, test_f1,test_precision,test_recall = evaluate_acc_f1(args, model, device, test_data, processor,macro = True, mode='test')
             _, test_f1_,test_precision_,test_recall_ = evaluate_acc_f1(args, model, device, test_data, processor, mode='test')
@@ -115,7 +114,7 @@ def train(args, model, device, train_data, dev_data, test_data, processor):
 
 
 def evaluate_acc_f1(args, model, device, data, processor, macro=False,pre = None, mode='test'):
-        data_loader = DataLoader(data, batch_size=args.dev_batch_size, collate_fn=MyDataset.collate_func,shuffle=False)
+        data_loader = DataLoader(data, batch_size=args.dev_batch_size, collate_fn=MyDataset.collate_func, shuffle=False, num_workers=4)
         n_correct, n_total = 0, 0
         t_targets_all, t_outputs_all = None, None
 

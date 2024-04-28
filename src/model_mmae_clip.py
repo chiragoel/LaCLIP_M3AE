@@ -32,12 +32,13 @@ class MMAECLIP(nn.Module):
 
         return config
 
-    def __init__(self, args, device, config_updates=None,  layers=3, num_classes=2, model_type='base'):
+    def __init__(self, args, device, config_updates=None,  layers=3, num_classes=2, model_type='base', global_pool='org'):
         super(MMAECLIP, self).__init__()
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.config = self.get_default_config(config_updates)
         self.device = device
         self.num_classes = num_classes
+        self.global_pool = global_pool
         
         if args.simple_linear:
             self.text_linear =  nn.Linear(args.text_size, args.text_size)
@@ -75,6 +76,8 @@ class MMAECLIP(nn.Module):
         self.classifier_image = nn.Linear(args.image_size, args.label_number)
 
         self.loss_fct = nn.CrossEntropyLoss()
+        if self.global_pool=='org':
+            self.att = nn.Linear(args.image_size, 1, bias=False)
 
         
     def load_embed_model(self, model_type, device, config_updates, layers):
@@ -119,7 +122,7 @@ class MMAECLIP(nn.Module):
         else:
             return 0.0
 
-    def forward(self, inputs, labels, deterministic=False, global_pool=True):
+    def forward(self, inputs, labels, deterministic=False):
         output = self.model(**inputs,output_attentions=True)
         
         text_feature = output['text_model_output']['pooler_output']
@@ -151,7 +154,21 @@ class MMAECLIP(nn.Module):
         # print('pm', padding_mask.shape, x.shape)
         x = self.encoder(x, deterministic, padding_mask)
         # The first token (CLS token) will have the combined info or we can global pool and aggregate info or we can also do it similar to MV_CLIP model where we do weight based aggregation
-        if global_pool:
+        if self.global_pool=='org':
+            new_text_features = x[:, 50:, :]
+            new_text_feature = new_text_features[
+            torch.arange(new_text_features.shape[0], device=inputs['input_ids'].device), 
+                inputs['input_ids'].to(torch.int).argmax(dim=-1)]
+
+            new_image_feature = x[:, 0, :] #.mean(axis=1)
+
+            text_weight = self.att(new_text_feature)
+            image_weight = self.att(new_image_feature)    
+            att = nn.functional.softmax(torch.stack((text_weight, image_weight), dim=-1),dim=-1)
+            tw, iw = att.split([1,1], dim=-1)
+            fuse_feature = tw.squeeze(1) * new_text_feature + iw.squeeze(1) * new_image_feature
+
+        elif self.global_pool=='avg':
             fuse_feature = x[:, 1:, :].mean(axis=1)  # global pool without cls token
         else:
             fuse_feature = x[:, 0]

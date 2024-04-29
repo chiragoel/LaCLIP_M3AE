@@ -28,8 +28,8 @@ def set_args():
     parser.add_argument('--model', default='MV_CLIP', type=str, help='the model name', choices=['MV_CLIP_original', 'MV_CLIP', 'MV_LaCLIP', 'MV_CLIP_MMAE', 'MV_LaCLIP_MMAE'])
     parser.add_argument('--text_name', default='text_json_final', type=str, help='the text data folder name')
     parser.add_argument('--simple_linear', default=False, type=bool, help='linear implementation choice')
-    parser.add_argument('--augs', default=True, type=bool, help='Add augmented data or not')
-    parser.add_argument('--replicate_mmae', default=True, type=bool, help='Transformer to replicate MMAE')
+    parser.add_argument('--augs', default=False, type=bool, help='Add augmented data or not')
+    parser.add_argument('--replicate_mmae', default=False, type=bool, help='Transformer to replicate MMAE')
     parser.add_argument('--num_train_epochs', default=10, type=int, help='number of train epoched')
     parser.add_argument('--train_batch_size', default=32, type=int, help='batch size in train phase')
     parser.add_argument('--dev_batch_size', default=32, type=int, help='batch size in dev phase')
@@ -69,6 +69,7 @@ def main():
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device
     device = torch.device("cuda" if torch.cuda.is_available() and int(args.device) >= 0 else "cpu")
     map_location = device + ':0' if device == 'cuda' else device
+    print('Augs are applied?', args.augs)
 
     seed_everything(args.seed)
 
@@ -79,12 +80,15 @@ def main():
         config=vars(args),
     )
     wandb.watch_called = False  
+    print('Model name:', args.model)
 
     if args.model == 'MV_CLIP_original':
+        print('In original DL')
         train_data = MyDatasetOriginal(mode='train', text_name=args.text_name, limit=None, is_augs=args.augs)
         dev_data = MyDatasetOriginal(mode='valid', text_name=args.text_name, limit=None)
         test_data = MyDatasetOriginal(mode='test', text_name=args.text_name, limit=None)
     else:
+        print('In CLIP DL')
         train_data = MyDataset(mode='train', text_name=args.text_name, limit=None, is_augs=args.augs)
         dev_data = MyDataset(mode='valid', text_name=args.text_name, limit=None)
         test_data = MyDataset(mode='test', text_name=args.text_name, limit=None)
@@ -110,8 +114,10 @@ def main():
     print('Device', device)
 
     if args.model == 'MV_CLIP_original':
+        print('in original')
         train_original(args, model, device, train_data, dev_data, test_data, processor)
     else:
+        print('in CLIP')
         train_clip(args, model, device, train_data, dev_data, test_data)
 
 

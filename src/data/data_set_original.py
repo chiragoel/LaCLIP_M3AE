@@ -47,6 +47,7 @@ class MyDatasetOriginal(Dataset):
                     data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
                     cnt += 1
             if self.is_augs:
+                print('Using augmentations!!!!!!!!!!!')
                 datas_augs = json.load(f2)
                 for data in datas_augs:
                     if limit != None and cnt >= limit:

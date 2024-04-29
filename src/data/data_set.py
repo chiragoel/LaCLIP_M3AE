@@ -21,6 +21,7 @@ class MyDataset(Dataset):
         self.text_name = text_name
         self.mode = mode
         self.is_augs = is_augs
+        print('Augs need to be applied: ', self.is_augs)
         self.image_dim = 224
         self.data = self.load_data(mode, limit)
 
@@ -70,7 +71,8 @@ class MyDataset(Dataset):
                 if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
                     data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
                     cnt += 1
-            if self.is_augs==True:
+            if self.is_augs:
+                print('Using Augmentation!!!!!!!!!!')
                 datas_augs = json.load(f2)
                 for data in datas_augs:
                     if limit != None and cnt >= limit:

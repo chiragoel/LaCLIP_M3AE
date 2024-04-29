@@ -33,10 +33,12 @@ class MV_CLIP(nn.Module):
         super(MV_CLIP, self).__init__()
         
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
-        if clip_model_name=='laclip':
+        if clip_model_name=='laclip': 
           chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_laclip.pt', map_location=map_location)
+          print('Using LACLIP!!!!!')
         elif clip_model_name=='clip':
           chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_clip.pt', map_location=map_location)
+          print('Using CLIP!!!!!')
         else:
           raise ValueError('Not a valid model type')
         self.model.load_state_dict(chkt['state_dict'], strict=True)
@@ -45,6 +47,7 @@ class MV_CLIP(nn.Module):
         self.replicate_mmae = replicate_mmae
         self.config = BertConfig.from_pretrained("bert-base-uncased")
         if self.replicate_mmae:
+            print('Replicating MMAE!!!!!')
             self.config.hidden_size = 768
             self.config.num_attention_heads = 12
         else:

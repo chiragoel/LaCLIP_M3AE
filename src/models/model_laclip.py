@@ -82,8 +82,8 @@ class MV_LaCLIP(nn.Module):
             self.classifier_text = nn.Linear(args.text_size, args.label_number)
             self.classifier_image = nn.Linear(args.image_size, args.label_number)
 
-            self.loss_fct = nn.CrossEntropyLoss()
-            self.att = nn.Linear(args.text_size, 1, bias=False)
+        self.loss_fct = nn.CrossEntropyLoss()
+        self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, image, text, padding_mask, input_ids, labels):
         output = self.model(image, text, padding_mask) 
@@ -91,7 +91,7 @@ class MV_LaCLIP(nn.Module):
         image_features = output['image_features']
         text_feature = output['text_feature']
         image_feature = output['image_feature']
-        text_feature = self.text_linear(ext_feature)
+        text_feature = self.text_linear(text_feature)
         image_feature = self.image_linear(image_feature)
 
         text_embeds = self.text_projection(self.ln_text_embed(text_features))

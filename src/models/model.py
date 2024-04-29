@@ -25,13 +25,15 @@ class MultimodalEncoder(nn.Module):
 
 
 class MV_CLIP(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, replicate_mmae=False):
         super(MV_CLIP, self).__init__()
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.config = BertConfig.from_pretrained("bert-base-uncased")
         self.config.hidden_size = 512
         self.config.num_attention_heads = 8
         self.trans = MultimodalEncoder(self.config, layer_number=args.layers)
+        
+        self.replicate_mmae = replicate_mmae
         if args.simple_linear:
             self.text_linear =  nn.Linear(args.text_size, args.text_size)
             self.image_linear =  nn.Linear(args.image_size, args.image_size)
@@ -47,9 +49,23 @@ class MV_CLIP(nn.Module):
                 nn.GELU()
             )
 
-        self.classifier_fuse = nn.Linear(args.text_size , args.label_number)
-        self.classifier_text = nn.Linear(args.text_size, args.label_number)
-        self.classifier_image = nn.Linear(args.image_size, args.label_number)
+        self.ln_img_embed = nn.LayerNorm(args.image_size)
+        self.ln_text_embed = nn.LayerNorm(args.text_size)
+        if self.replicate_mmae:
+            self.text_projection = nn.Linear(args.text_size, args.image_size, bias=False)
+            self.image_projection = nn.Linear(args.image_size, args.image_size, bias=False)
+            self.classifier_fuse = nn.Linear(args.image_size , args.label_number)
+            self.classifier_text = nn.Linear(args.text_size, args.label_number)
+            self.classifier_image = nn.Linear(args.image_size, args.label_number)
+
+            self.loss_fct = nn.CrossEntropyLoss()
+            self.att = nn.Linear(args.image_size, 1, bias=False)
+        else:
+            self.text_projection = nn.Linear(args.text_size, args.text_size, bias=False)
+            self.image_projection = nn.Linear(args.image_size, args.text_size, bias=False)
+            self.classifier_fuse = nn.Linear(args.text_size , args.label_number)
+            self.classifier_text = nn.Linear(args.text_size, args.label_number)
+            self.classifier_image = nn.Linear(args.image_size, args.label_number)
 
         self.loss_fct = nn.CrossEntropyLoss()
         self.att = nn.Linear(args.text_size, 1, bias=False)
@@ -63,8 +79,8 @@ class MV_CLIP(nn.Module):
         text_feature = self.text_linear(text_feature)
         image_feature = self.image_linear(image_feature)
 
-        text_embeds = self.model.text_projection(text_features)
-        image_embeds = self.model.visual_projection(image_features)
+        text_embeds = self.text_projection(self.ln_text_embed(text_features))
+        image_embeds = self.image_projection(self.ln_img_embed(image_features))
         input_embeds = torch.cat((image_embeds, text_embeds), dim=1)
         attention_mask = torch.cat((torch.ones(text_features.shape[0], 50).to(text_features.device), inputs['attention_mask']), dim=-1)
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)

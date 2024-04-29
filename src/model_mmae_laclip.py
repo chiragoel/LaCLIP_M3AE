@@ -35,7 +35,7 @@ class MMAELaCLIP(nn.Module):
 
     def __init__(self, args, device, config_updates=None,  layers=3, num_classes=2, model_type='base', global_pool='avg'):
         super(MMAELaCLIP, self).__init__()
-        self.model = oc.factory.create_model('ViT-B-32')
+        self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         map_location = device + ':0' if device == 'cuda' else device 
         chkt = torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location)
         self.model.load_state_dict(chkt['state_dict'], strict=True)

@@ -245,7 +245,7 @@ class CLIP(nn.Module):
         self.ln_final = text.ln_final
         self.text_projection = text.text_projection
         self.text_pool_type = text.pool_type
-        self.register_buffer('attn_mask', text.attn_mask, persistent=False)
+        # self.register_buffer('attn_mask', text.attn_mask, persistent=False)
 
         self.logit_scale = nn.Parameter(torch.ones([]) * init_logit_scale)
         if init_logit_bias is not None:
@@ -267,14 +267,14 @@ class CLIP(nn.Module):
         # feature = features[:,1:,:]
         return self.visual(image)
 
-    def encode_text(self, text, normalize: bool = False):
+    def encode_text(self, text, normalize: bool = False, attn_mask=None):
         cast_dtype = self.transformer.get_cast_dtype()
 
         x = self.token_embedding(text).to(cast_dtype)  # [batch_size, n_ctx, d_model]
 
         x = x + self.positional_embedding.to(cast_dtype)
         x = x.permute(1, 0, 2)  # NLD -> LND
-        x = self.transformer(x, attn_mask=self.attn_mask)
+        x = self.transformer(x, attn_mask=attn_mask)
         x = x.permute(1, 0, 2)  # LND -> NLD
         x = self.ln_final(x)  # [batch_size, n_ctx, transformer.width]
         x_feature, _ = text_global_pool(x, text, self.text_pool_type)
@@ -299,9 +299,10 @@ class CLIP(nn.Module):
             self,
             image: Optional[torch.Tensor] = None,
             text: Optional[torch.Tensor] = None,
+            attn_mask: Optional[torch.Tensor] = None,
     ):
         image_feature, image_features = self.encode_image(image, normalize=True) if image is not None else None
-        text_features, text_feature = self.encode_text(text, normalize=True) if text is not None else None
+        text_features, text_feature = self.encode_text(text, normalize=True, attn_mask=attn_mask) if text is not None else None
 
         if self.output_dict:
             out_dict = {

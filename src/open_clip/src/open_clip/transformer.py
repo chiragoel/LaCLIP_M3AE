@@ -225,7 +225,7 @@ class ResidualAttentionBlock(nn.Module):
 
         attn_mask = attn_mask.to(q_x.dtype) if attn_mask is not None else None
         return self.attn(
-            q_x, k_x, v_x, need_weights=False, attn_mask=attn_mask
+            q_x, k_x, v_x, need_weights=False, key_padding_mask=attn_mask
         )[0]
 
     def forward(

@@ -17,8 +17,8 @@ from models.model import MV_CLIPOriginal
 from models.model_laclip import MV_CLIP
 from models.model_mmae_laclip import MMAECLIP
 
-from train import train_original
-from train_mmae_laclip import train_clip
+from train import train_clip
+from train_original import train_original
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 

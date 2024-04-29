@@ -68,8 +68,8 @@ class MV_CLIPOriginal(nn.Module):
             self.classifier_text = nn.Linear(args.text_size, args.label_number)
             self.classifier_image = nn.Linear(args.image_size, args.label_number)
 
-        self.loss_fct = nn.CrossEntropyLoss()
-        self.att = nn.Linear(args.text_size, 1, bias=False)
+            self.loss_fct = nn.CrossEntropyLoss()
+            self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, inputs, labels):
         output = self.model(**inputs,output_attentions=True)

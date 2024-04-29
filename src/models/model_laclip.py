@@ -34,9 +34,9 @@ class MV_CLIP(nn.Module):
         
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         if clip_model_name=='laclip':
-          chkt = torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location)
+          chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_laclip.pt', map_location=map_location)
         elif clip_model_name=='clip':
-          chkt = torch.load('./laclip_model/laion400m_clip.pt', map_location=map_location)
+          chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_clip.pt', map_location=map_location)
         else:
           raise ValueError('Not a valid model type')
         self.model.load_state_dict(chkt['state_dict'], strict=True)
@@ -85,8 +85,8 @@ class MV_CLIP(nn.Module):
             self.classifier_text = nn.Linear(args.text_size, args.label_number)
             self.classifier_image = nn.Linear(args.image_size, args.label_number)
 
-        self.loss_fct = nn.CrossEntropyLoss()
-        self.att = nn.Linear(args.text_size, 1, bias=False)
+            self.loss_fct = nn.CrossEntropyLoss()
+            self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, image, text, padding_mask, input_ids, labels):
         output = self.model(image, text, padding_mask) 

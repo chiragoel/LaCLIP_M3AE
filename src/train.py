@@ -1,5 +1,5 @@
 import os
-from data_set import MyDataset
+from data_set_original import MyDataset
 from torch.utils.data import DataLoader
 import torch
 import logging

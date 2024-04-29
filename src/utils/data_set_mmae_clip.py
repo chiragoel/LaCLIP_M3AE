@@ -50,15 +50,15 @@ class MyDataset(Dataset):
                     data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
                     cnt += 1
             if self.is_augs:
-              datas_augs = json.load(f2)
-              for data in datas_augs:
-                  image = data['image_id']
-                  sentence = data['text']
-                  label = data['label']
-  
-                  if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
-                      data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
-                      cnt+=1
+                datas_augs = json.load(f2)
+                for data in datas_augs:
+                    image = data['image_id']
+                    sentence = data['text']
+                    label = data['label']
+    
+                    if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
+                        data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
+                        cnt+=1
         
         if mode in ["test","valid"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')

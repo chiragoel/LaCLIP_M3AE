@@ -1,5 +1,5 @@
 import os
-from data_set_laclip import MyDataset
+from data_set import MyDataset
 from torch.utils.data import DataLoader
 import torch
 import logging

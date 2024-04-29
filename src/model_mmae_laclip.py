@@ -76,8 +76,10 @@ class MMAELaCLIP(nn.Module):
 
         self.encoder = self.load_embed_model(model_type, device, config_updates, layers)
         
-        self.ln_img_embed = nn.LayerNorm(args.image_size)
-        self.ln_text_embed = nn.LayerNorm(args.text_size)
+        self.ln_img_embed1 = nn.LayerNorm(args.image_size)
+        self.ln_text_embed1 = nn.LayerNorm(args.text_size)
+        self.ln_img_embed2 = nn.LayerNorm(args.image_size)
+        self.ln_text_embed2 = nn.LayerNorm(args.text_size)
         self.classifier_fuse = nn.Linear(args.image_size , args.label_number)
         self.classifier_text = nn.Linear(args.text_size, args.label_number)
         self.classifier_image = nn.Linear(args.image_size, args.label_number)
@@ -130,38 +132,34 @@ class MMAELaCLIP(nn.Module):
             return 0.0
 
     def forward(self, image, text, padding_mask, input_ids, labels, deterministic=False):
-        output = self.model(image, text)
+        output = self.model(image, text, padding_mask)
         
         text_feature = output['text_feature']
         image_feature = output['image_feature']
-        text_feature = self.text_linear(text_feature)
-        image_feature = self.image_linear(image_feature)
+        text_feature = self.text_linear(self.ln_text_embed1(text_feature))
+        image_feature = self.image_linear(self.ln_img_embed1(image_feature))
         
         # Add projection layers text (512->768) and image (768->768)
-        text_features = self.text_projection(self.ln_text_embed(output['text_features'])) #Remove CLS token
-        image_features = self.image_projection(self.ln_img_embed(output['image_features']))#[:,1:,:])
+        text_features = self.text_projection(self.ln_text_embed2(output['text_features'])) #Remove CLS token
+        image_features = self.image_projection(self.ln_img_embed2(output['image_features']))#[:,1:,:])
         # print(text_features.shape, image_features.shape)
         batch_size = image_features.shape[0]
         
         #TODO: Resolve CLS token Discrepancy
         # cls_token = self.cls_token.expand(batch_size, 1, self.config.emb_dim)
-        input_tensors = []
-        padding_masks = [] #[torch.zeros((batch_size, 1), dtype=torch.float32).to(self.device)]
+        input_tensors = torch.cat((image_features, text_features), dim=1)
+        # padding_masks = [] #[torch.zeros((batch_size, 1), dtype=torch.float32).to(self.device)]
         
-        input_tensors.append(image_features)
-        padding_masks.append(torch.zeros((batch_size, image_features.shape[1]), dtype=torch.float32).to(self.device))
+        # padding_masks.append(torch.zeros((batch_size, image_features.shape[1]), dtype=torch.float32).to(self.device))
 
-        
-        input_tensors.append(text_features)
         #Do 1-padding mask because the attention class will deselect all with weights >0. So tokens that are present in text should be 0
-        padding_masks.append((padding_mask).to(self.device))
+        # padding_masks.append((padding_mask).to(self.device))
         
         # print(padding_masks[0].shape, padding_masks[1].shape, padding_masks[2].shape)
 
-        x = torch.cat(input_tensors, dim=1)
-        padding_mask = torch.cat(padding_masks, dim=1)
+        padding_mask = torch.cat((torch.zeros((batch_size, image_features.shape[1]), dtype=torch.float32), padding_mask), dim=1).to(self.device))
         # print('pm', padding_mask.shape, x.shape)
-        x = self.encoder(x, deterministic, padding_mask)
+        x = self.encoder(input_tensors, deterministic, padding_mask)
         # The first token (CLS token) will have the combined info or we can global pool and aggregate info or we can also do it similar to MV_CLIP model where we do weight based aggregation
         
         if self.global_pool=='org':

@@ -29,7 +29,7 @@ class MV_LaCLIP(nn.Module):
     def __init__(self, args, map_location='cpu', device='cpu'):
         super(MV_LaCLIP, self).__init__()
         
-        self.model = oc.factory.create_model('ViT-B-32')
+        self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         chkt = torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location)
         self.model.load_state_dict(chkt['state_dict'], strict=True)
         self.model.to(device)
@@ -53,6 +53,10 @@ class MV_LaCLIP(nn.Module):
                 nn.GELU()
             )
 
+        self.ln_img_embed1 = nn.LayerNorm(args.image_size)
+        self.ln_text_embed1 = nn.LayerNorm(args.text_size)
+        self.ln_img_embed2 = nn.LayerNorm(args.image_size)
+        self.ln_text_embed2 = nn.LayerNorm(args.text_size)
         self.text_projection = nn.Linear(args.text_size, args.text_size)
         self.image_projection = nn.Linear(args.image_size, args.text_size)
         self.classifier_fuse = nn.Linear(args.text_size , args.label_number)
@@ -63,16 +67,16 @@ class MV_LaCLIP(nn.Module):
         self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, image, text, padding_mask, input_ids, labels):
-        output = self.model(image, text) #, key_pad_mask=padding_mask
+        output = self.model(image, text, padding_mask) 
         text_features = output['text_features']
         image_features = output['image_features']
         text_feature = output['text_feature']
         image_feature = output['image_feature']
-        text_feature = self.text_linear(text_feature)
-        image_feature = self.image_linear(image_feature)
+        text_feature = self.text_linear(self.ln_text_embed1(text_feature))
+        image_feature = self.image_linear(self.ln_img_embed1(image_feature))
 
-        text_embeds = self.text_projection(text_features)
-        image_embeds = self.image_projection(image_features)
+        text_embeds = self.text_projection(self.ln_text_embed2(text_features))
+        image_embeds = self.image_projection(self.ln_img_embed2(image_features))
         input_embeds = torch.cat((image_embeds, text_embeds), dim=1)
         attention_mask = torch.cat((torch.ones(text_features.shape[0], 50).to(text_features.device), 1.0 - padding_mask), dim=-1)
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)

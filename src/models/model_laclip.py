@@ -25,9 +25,9 @@ class MultimodalEncoder(nn.Module):
         return all_encoder_layers, all_encoder_attentions
 
 
-class MV_LaCLIP(nn.Module):
+class MV_CLIP(nn.Module):
     def __init__(self, args, map_location='cpu', device='cpu', clip_model_name='laclip', replicate_mmae=False):
-        super(MV_LaCLIP, self).__init__()
+        super(MV_CLIP, self).__init__()
         
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         if clip_model_name=='laclip':

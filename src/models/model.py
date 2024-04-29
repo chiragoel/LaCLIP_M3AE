@@ -24,9 +24,9 @@ class MultimodalEncoder(nn.Module):
         return all_encoder_layers, all_encoder_attentions
 
 
-class MV_CLIP(nn.Module):
+class MV_CLIPOriginal(nn.Module):
     def __init__(self, args, replicate_mmae=False):
-        super(MV_CLIP, self).__init__()
+        super(MV_CLIPOriginal, self).__init__()
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.config = BertConfig.from_pretrained("bert-base-uncased")
         self.config.hidden_size = 512

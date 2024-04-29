@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 logger = logging.getLogger(__name__)
 WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
 
-class MyDataset(Dataset):
+class MyDatasetOriginal(Dataset):
     def __init__(self, mode, text_name, limit=None, is_augs=True):
         
         self.text_name = text_name

@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import copy
 
-class MMAELaCLIP(nn.Module):
+class MMAECLIP(nn.Module):
     def get_default_config(self, updates=None):
         config = ConfigDict()
         config.model_type = 'small'
@@ -34,7 +34,7 @@ class MMAELaCLIP(nn.Module):
         return config
 
     def __init__(self, args, device, config_updates=None,  layers=3, num_classes=2, model_type='base', global_pool='org', clip_model_name='laclip'):
-        super(MMAELaCLIP, self).__init__()
+        super(MMAECLIP, self).__init__()
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         map_location = device + ':0' if device == 'cuda' else device
         if clip_model_name=='laclip':

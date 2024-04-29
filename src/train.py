@@ -1,5 +1,5 @@
 import os
-from data_set_original import MyDataset
+from data.data_set_original import MyDataset
 from torch.utils.data import DataLoader
 import torch
 import logging
@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 
-def train(args, model, device, train_data, dev_data, test_data, processor):
+def train_original(args, model, device, train_data, dev_data, test_data, processor):
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
 

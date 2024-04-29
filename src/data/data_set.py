@@ -12,8 +12,8 @@ import transformers
 from data.laclip_tokenizer import SimpleTokenizer
 
 logger = logging.getLogger(__name__)
-#WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
-WORKING_PATH="/content/drive/MyDrive/MMSD_project/data"
+WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
+# WORKING_PATH="/content/drive/MyDrive/MMSD_project/data"
 
 class MyDataset(Dataset):
     def __init__(self, mode, text_name, limit=None, is_augs=False):
@@ -58,7 +58,7 @@ class MyDataset(Dataset):
         data_set=dict()
         if mode in ["train"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')
-            f2= open('/content/augmented_data (1).json','r',encoding='utf-8')
+            f2= open(os.path.join(WORKING_PATH, "augmented_data.json"),'r',encoding='utf-8')
             datas = json.load(f1)
             for data in datas:
                 if limit != None and cnt >= limit:

@@ -38,12 +38,12 @@ class MMAECLIP(nn.Module):
         super(MMAECLIP, self).__init__()
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         map_location = device + ':0' if device == 'cuda' else device
-        if clip_model_name=='laclip':
-          chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_laclip.pt', map_location=map_location)
-          print('Using LACIP!!!!!!')
+        if clip_model_name=='laclip': 
+          chkt = torch.load('./model_weights/laion400m_laclip.pt', map_location=map_location)
+          print('Using LACLIP!!!!!')
         elif clip_model_name=='clip':
-          chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_clip.pt', map_location=map_location)
-          print('Using CIP!!!!!!')
+          chkt = torch.load('./model_weights/laion400m_clip.pt', map_location=map_location)
+          print('Using CLIP!!!!!')
         else:
           raise ValueError('Not a valid model type') 
         self.model.load_state_dict(chkt['state_dict'], strict=True)
@@ -97,11 +97,11 @@ class MMAECLIP(nn.Module):
         
     def load_embed_model(self, model_type, device, config_updates, layers):
         if model_type == 'base':
-            embed_model_load_path = '/content/drive/MyDrive/MMSD_project/torch_weights/m3ae_base.pth'
+            embed_model_load_path = './model_weights/mmae_weights/m3ae_base.pth'
         elif model_type == 'small':
-            embed_model_load_path = '/content/drive/MyDrive/MMSD_project/torch_weights/m3ae_small.pth'
+            embed_model_load_path = './model_weights/mmae_weights/m3ae_small.pth'
         else:
-            embed_model_load_path = '/content/drive/MyDrive/MMSD_project/torch_weights/m3ae_large.pth'
+            embed_model_load_path = './model_weights/mmae_weights/m3ae_large.pth'
 
         map_location = device + ':0' if device == 'cuda' else device
         encoder_model = MaskedMultimodalAutoencoder(30522, device, config_updates)

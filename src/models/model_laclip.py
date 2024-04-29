@@ -34,10 +34,10 @@ class MV_CLIP(nn.Module):
         
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
         if clip_model_name=='laclip': 
-          chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_laclip.pt', map_location=map_location)
+          chkt = torch.load('./model_weights/laion400m_laclip.pt', map_location=map_location)
           print('Using LACLIP!!!!!')
         elif clip_model_name=='clip':
-          chkt = torch.load('/content/drive/MyDrive/MMSD_project/laion400m_clip.pt', map_location=map_location)
+          chkt = torch.load('./model_weights/laion400m_clip.pt', map_location=map_location)
           print('Using CLIP!!!!!')
         else:
           raise ValueError('Not a valid model type')

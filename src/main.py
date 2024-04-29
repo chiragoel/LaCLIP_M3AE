@@ -65,6 +65,7 @@ def seed_everything(seed=42):
 
 def main():
     args = set_args()
+    os.makedirs(args.output_dir, exist_ok=True)
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device
     device = torch.device("cuda" if torch.cuda.is_available() and int(args.device) >= 0 else "cpu")

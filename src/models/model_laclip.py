@@ -26,11 +26,16 @@ class MultimodalEncoder(nn.Module):
 
 
 class MV_LaCLIP(nn.Module):
-    def __init__(self, args, map_location='cpu', device='cpu'):
+    def __init__(self, args, map_location='cpu', device='cpu', clip_model_name='laclip'):
         super(MV_LaCLIP, self).__init__()
         
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
-        chkt = torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location)
+        if clip_model_name=='laclip':
+          chkt = torch.load('./laclip_model/laion400m_laclip.pt', map_location=map_location)
+        elif clip_model_name=='clip':
+          chkt = torch.load('./laclip_model/laion400m_clip.pt', map_location=map_location)
+        else:
+          raise ValueError('Not a valid model type')
         self.model.load_state_dict(chkt['state_dict'], strict=True)
         self.model.to(device)
         self.config = BertConfig.from_pretrained("bert-base-uncased")

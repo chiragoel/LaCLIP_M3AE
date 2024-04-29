@@ -26,7 +26,7 @@ class MultimodalEncoder(nn.Module):
 
 
 class MV_LaCLIP(nn.Module):
-    def __init__(self, args, map_location='cpu', device='cpu', clip_model_name='laclip'):
+    def __init__(self, args, map_location='cpu', device='cpu', clip_model_name='laclip', replicate_mmae=False):
         super(MV_LaCLIP, self).__init__()
         
         self.model = oc.factory.create_model(model_name='ViT-B-32', precision='amp', force_quick_gelu=True)
@@ -38,9 +38,15 @@ class MV_LaCLIP(nn.Module):
           raise ValueError('Not a valid model type')
         self.model.load_state_dict(chkt['state_dict'], strict=True)
         self.model.to(device)
+
+        self.replicate_mmae = replicate_mmae
         self.config = BertConfig.from_pretrained("bert-base-uncased")
-        self.config.hidden_size = 512
-        self.config.num_attention_heads = 8
+        if self.replicate_mmae:
+            self.config.hidden_size = 768
+            self.config.num_attention_heads = 12
+        else:
+            self.config.hidden_size = 512
+            self.config.num_attention_heads = 8
         self.trans = MultimodalEncoder(self.config, layer_number=args.layers)
         self.trans.to(device)
         if args.simple_linear:
@@ -60,14 +66,24 @@ class MV_LaCLIP(nn.Module):
 
         self.ln_img_embed = nn.LayerNorm(args.image_size)
         self.ln_text_embed = nn.LayerNorm(args.text_size)
-        self.text_projection = nn.Linear(args.text_size, args.text_size, bias=False)
-        self.image_projection = nn.Linear(args.image_size, args.text_size, bias=False)
-        self.classifier_fuse = nn.Linear(args.text_size , args.label_number)
-        self.classifier_text = nn.Linear(args.text_size, args.label_number)
-        self.classifier_image = nn.Linear(args.image_size, args.label_number)
+        if self.replicate_mmae:
+            self.text_projection = nn.Linear(args.text_size, args.image_size, bias=False)
+            self.image_projection = nn.Linear(args.image_size, args.image_size, bias=False)
+            self.classifier_fuse = nn.Linear(args.image_size , args.label_number)
+            self.classifier_text = nn.Linear(args.text_size, args.label_number)
+            self.classifier_image = nn.Linear(args.image_size, args.label_number)
 
-        self.loss_fct = nn.CrossEntropyLoss()
-        self.att = nn.Linear(args.text_size, 1, bias=False)
+            self.loss_fct = nn.CrossEntropyLoss()
+            self.att = nn.Linear(args.image_size, 1, bias=False)
+        else:
+            self.text_projection = nn.Linear(args.text_size, args.text_size, bias=False)
+            self.image_projection = nn.Linear(args.image_size, args.text_size, bias=False)
+            self.classifier_fuse = nn.Linear(args.text_size , args.label_number)
+            self.classifier_text = nn.Linear(args.text_size, args.label_number)
+            self.classifier_image = nn.Linear(args.image_size, args.label_number)
+
+            self.loss_fct = nn.CrossEntropyLoss()
+            self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, image, text, padding_mask, input_ids, labels):
         output = self.model(image, text, padding_mask) 

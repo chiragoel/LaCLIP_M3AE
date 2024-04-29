@@ -1,9 +1,10 @@
+import copy
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from transformers import CLIPModel,BertConfig
 from transformers.models.bert.modeling_bert import BertLayer
-import torch.nn as nn
-import torch
-import torch.nn.functional as F
-import copy
 
 class MultimodalEncoder(nn.Module):
     def __init__(self, config, layer_number):

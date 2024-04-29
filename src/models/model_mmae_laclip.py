@@ -1,10 +1,11 @@
-from m3ae_model import *
-from transformers import CLIPModel
-import open_clip.src.open_clip as oc
-import torch.nn as nn
-import torch
-import torch.nn.functional as F
 import copy
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+from models.m3ae_model import *
+import models.open_clip.src.open_clip as oc
 
 class MMAECLIP(nn.Module):
     def get_default_config(self, updates=None):

@@ -1,10 +1,13 @@
-from transformers import BertConfig
-import open_clip.src.open_clip as oc
-from transformers.models.bert.modeling_bert import BertLayer
-import torch.nn as nn
-import torch
-import torch.nn.functional as F
 import copy
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+from transformers import BertConfig
+from transformers.models.bert.modeling_bert import BertLayer
+
+import models.open_clip.src.open_clip as oc
 
 class MultimodalEncoder(nn.Module):
     def __init__(self, config, layer_number):

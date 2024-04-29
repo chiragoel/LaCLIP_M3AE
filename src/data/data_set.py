@@ -1,17 +1,21 @@
-from torch.utils.data import Dataset
-import logging
 import os
-import torch
-from PIL import Image
 import json
-import transformers
+import logging
+from PIL import Image
+
+import torch
+from torch.utils.data import Dataset
 import torchvision.transforms as transforms
-from laclip_tokenizer import SimpleTokenizer
+
+import transformers
+
+from data.laclip_tokenizer import SimpleTokenizer
+
 logger = logging.getLogger(__name__)
 WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
 
 class MyDataset(Dataset):
-    def __init__(self, mode, text_name, limit=None, is_augs=True):
+    def __init__(self, mode, text_name, limit=None, is_augs=False):
         
         self.text_name = text_name
         self.mode = mode

@@ -1,15 +1,17 @@
-from torch.utils.data import Dataset
-import logging
 import os
-from PIL import Image
 import json
+import logging
+
+from torch.utils.data import Dataset
+
 import transformers
+from PIL import Image
 import torchvision.transforms as transforms
 logger = logging.getLogger(__name__)
 WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
 
 class MyDatasetOriginal(Dataset):
-    def __init__(self, mode, text_name, limit=None, is_augs=True):
+    def __init__(self, mode, text_name, limit=None, is_augs=False):
         
         self.text_name = text_name
         self.is_augs = is_augs

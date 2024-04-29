@@ -81,17 +81,17 @@ def main():
     wandb.watch_called = False  
 
     if args.model == 'MV_CLIP_original':
-        train_data = MyDatasetOriginal(mode='train', text_name=args.text_name, limit=None)
+        train_data = MyDatasetOriginal(mode='train', text_name=args.text_name, limit=None, is_augs=args.augs)
         dev_data = MyDatasetOriginal(mode='valid', text_name=args.text_name, limit=None)
         test_data = MyDatasetOriginal(mode='test', text_name=args.text_name, limit=None)
     else:
-        train_data = MyDataset(mode='train', text_name=args.text_name, limit=None)
+        train_data = MyDataset(mode='train', text_name=args.text_name, limit=None, is_augs=args.augs)
         dev_data = MyDataset(mode='valid', text_name=args.text_name, limit=None)
         test_data = MyDataset(mode='test', text_name=args.text_name, limit=None)
 
     if args.model == 'MV_CLIP_original':
         processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-        model = MV_CLIPOriginal(args)
+        model = MV_CLIPOriginal(args, replicate_mmae=args.replicate_mmae)
     elif args.model == 'MV_CLIP':
         model = MV_CLIP(args,map_location, device, clip_model_name='clip', replicate_mmae=args.replicate_mmae)
     elif args.model == 'MV_LaCLIP':

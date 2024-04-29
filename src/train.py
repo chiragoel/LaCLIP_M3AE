@@ -1,12 +1,16 @@
 import os
-from data.data_set_original import MyDataset
-from torch.utils.data import DataLoader
-import torch
+import wandb
 import logging
 from tqdm import tqdm, trange
-from sklearn import metrics
-import wandb
+
 import numpy as np
+from sklearn import metrics
+
+import torch
+from torch.utils.data import DataLoader
+from transformers.optimization import AdamW, get_linear_schedule_with_warmup
+
+from data.data_set_original import MyDatasetOriginal
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -20,48 +24,21 @@ def train_original(args, model, device, train_data, dev_data, test_data, process
 
     train_loader = DataLoader(dataset=train_data,
                               batch_size=args.train_batch_size,
-                              collate_fn=MyDataset.collate_func,
+                              collate_fn=MyDatasetOriginal.collate_func,
                               shuffle=True)
     total_steps = int(len(train_loader) * args.num_train_epochs)
     model.to(device)
 
-    if args.optimizer_name == 'adafactor':
-        from transformers.optimization import Adafactor, AdafactorSchedule
+    print('Use AdamW Optimizer for Training.')
+    clip_params = list(map(id, model.model.parameters()))
+    base_params = filter(lambda p: id(p) not in clip_params, model.parameters())
+    optimizer = AdamW([
+            {"params": base_params},
+            {"params": model.model.parameters(),"lr": args.clip_learning_rate}
+            ], lr=args.learning_rate, weight_decay=args.weight_decay)
 
-        print('Use Adafactor Optimizer for Training.')
-        optimizer = Adafactor(
-            model.parameters(),
-            # lr=1e-3,
-            # eps=(1e-30, 1e-3),
-            # clip_threshold=1.0,
-            # decay_rate=-0.8,
-            # beta1=None,
-            lr=None,
-            weight_decay=args.weight_decay,
-            relative_step=True,
-            scale_parameter=True,
-            warmup_init=True
-        )
-        scheduler = AdafactorSchedule(optimizer)
-    elif args.optimizer_name == 'adam':
-        print('Use AdamW Optimizer for Training.')
-        from transformers.optimization import AdamW, get_linear_schedule_with_warmup
-        if args.model == 'MV_CLIP':
-            clip_params = list(map(id, model.model.parameters()))
-            base_params = filter(lambda p: id(p) not in clip_params, model.parameters())
-            optimizer = AdamW([
-                    {"params": base_params},
-                    {"params": model.model.parameters(),"lr": args.clip_learning_rate}
-                    ], lr=args.learning_rate, weight_decay=args.weight_decay)
-
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
-                                                    num_training_steps=total_steps)
-        else:
-            optimizer = optimizer = AdamW(model.parameters(), lr=args.learning_rate, eps=args.adam_epsilon, weight_decay=args.weight_decay)
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
-                                                num_training_steps=total_steps)
-    else:
-        raise Exception('Wrong Optimizer Name!!!')
+    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=int(args.warmup_proportion * total_steps),
+                                            num_training_steps=total_steps)
 
 
     max_acc = 0.
@@ -74,9 +51,8 @@ def train_original(args, model, device, train_data, dev_data, test_data, process
 
         for step, batch in enumerate(iter_bar):
             text_list, image_list, label_list, id_list = batch
-            if args.model == 'MV_CLIP':
-                inputs = processor(text=text_list, images=image_list, padding='max_length', truncation=True, max_length=args.max_len, return_tensors="pt").to(device)
-                labels = torch.tensor(label_list).to(device)
+            inputs = processor(text=text_list, images=image_list, padding='max_length', truncation=True, max_length=args.max_len, return_tensors="pt").to(device)
+            labels = torch.tensor(label_list).to(device)
 
             loss, score = model(inputs,labels=labels)
             sum_loss += loss.item()
@@ -115,7 +91,7 @@ def train_original(args, model, device, train_data, dev_data, test_data, process
 
 
 def evaluate_acc_f1(args, model, device, data, processor, macro=False,pre = None, mode='test'):
-        data_loader = DataLoader(data, batch_size=args.dev_batch_size, collate_fn=MyDataset.collate_func,shuffle=False)
+        data_loader = DataLoader(data, batch_size=args.dev_batch_size, collate_fn=MyDatasetOriginal.collate_func,shuffle=False)
         n_correct, n_total = 0, 0
         t_targets_all, t_outputs_all = None, None
 
@@ -125,9 +101,8 @@ def evaluate_acc_f1(args, model, device, data, processor, macro=False,pre = None
         with torch.no_grad():
             for i_batch, t_batch in enumerate(data_loader):
                 text_list, image_list, label_list, id_list = t_batch
-                if args.model == 'MV_CLIP':
-                    inputs = processor(text=text_list, images=image_list, padding='max_length', truncation=True, max_length=args.max_len, return_tensors="pt").to(device)
-                    labels = torch.tensor(label_list).to(device)
+                inputs = processor(text=text_list, images=image_list, padding='max_length', truncation=True, max_length=args.max_len, return_tensors="pt").to(device)
+                labels = torch.tensor(label_list).to(device)
                 
                 t_targets = labels
                 loss, t_outputs = model(inputs,labels=labels)

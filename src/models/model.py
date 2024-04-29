@@ -30,11 +30,15 @@ class MV_CLIPOriginal(nn.Module):
         super(MV_CLIPOriginal, self).__init__()
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.config = BertConfig.from_pretrained("bert-base-uncased")
-        self.config.hidden_size = 512
-        self.config.num_attention_heads = 8
+        self.replicate_mmae = replicate_mmae
+        if self.replicate_mmae:
+            self.config.hidden_size = 768
+            self.config.num_attention_heads = 12
+        else:
+            self.config.hidden_size = 512
+            self.config.num_attention_heads = 8
         self.trans = MultimodalEncoder(self.config, layer_number=args.layers)
         
-        self.replicate_mmae = replicate_mmae
         if args.simple_linear:
             self.text_linear =  nn.Linear(args.text_size, args.text_size)
             self.image_linear =  nn.Linear(args.image_size, args.image_size)
@@ -53,6 +57,7 @@ class MV_CLIPOriginal(nn.Module):
         self.ln_img_embed = nn.LayerNorm(args.image_size)
         self.ln_text_embed = nn.LayerNorm(args.text_size)
         if self.replicate_mmae:
+            print('Replicating MMAE')
             self.text_projection = nn.Linear(args.text_size, args.image_size, bias=False)
             self.image_projection = nn.Linear(args.image_size, args.image_size, bias=False)
             self.classifier_fuse = nn.Linear(args.image_size , args.label_number)
@@ -62,6 +67,7 @@ class MV_CLIPOriginal(nn.Module):
             self.loss_fct = nn.CrossEntropyLoss()
             self.att = nn.Linear(args.image_size, 1, bias=False)
         else:
+            print('Original ')
             self.text_projection = nn.Linear(args.text_size, args.text_size, bias=False)
             self.image_projection = nn.Linear(args.image_size, args.text_size, bias=False)
             self.classifier_fuse = nn.Linear(args.text_size , args.label_number)

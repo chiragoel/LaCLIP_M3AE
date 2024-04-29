@@ -8,17 +8,18 @@ import transformers
 from PIL import Image
 import torchvision.transforms as transforms
 logger = logging.getLogger(__name__)
-WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
+# WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
+WORKING_PATH="/content/drive/MyDrive/MMSD_project/data"
 
 class MyDatasetOriginal(Dataset):
     def __init__(self, mode, text_name, limit=None, is_augs=False):
         
         self.text_name = text_name
         self.is_augs = is_augs
+        self.mode = mode
+        self.image_dim = 224
         self.data = self.load_data(mode, limit)
-        self.image_ids=list(self.data.keys())
-        for id in self.data.keys():
-            self.data[id]["image_path"] = os.path.join(WORKING_PATH,"dataset_image",str(id)+".jpg")
+
         if self.mode=='train' and self.is_augs==True:
             self.transform = transforms.Compose([
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
@@ -33,7 +34,7 @@ class MyDatasetOriginal(Dataset):
         data_set=dict()
         if mode in ["train"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')
-            f2= open(os.path.join('/home/chirag/projects/def-sponsor00/chirag/CLIP-MA-MMSD/data/augmented_data (1).json'),'r',encoding='utf-8')
+            f2= open('/content/augmented_data (1).json','r',encoding='utf-8')
             datas = json.load(f1)
             for data in datas:
                 if limit != None and cnt >= limit:
@@ -93,7 +94,7 @@ class MyDatasetOriginal(Dataset):
         return text,image_feature, label, id
 
     def __len__(self):
-        return len(self.image_ids)
+        return len(self.data.keys())
     @staticmethod
     def collate_func(batch_data):
         batch_size = len(batch_data)

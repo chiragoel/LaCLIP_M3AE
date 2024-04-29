@@ -12,15 +12,17 @@ import transformers
 from data.laclip_tokenizer import SimpleTokenizer
 
 logger = logging.getLogger(__name__)
-WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
+#WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
+WORKING_PATH="/content/drive/MyDrive/MMSD_project/data"
 
 class MyDataset(Dataset):
     def __init__(self, mode, text_name, limit=None, is_augs=False):
         
         self.text_name = text_name
         self.mode = mode
-        self.data = self.load_data(mode, limit)
         self.is_augs = is_augs
+        self.image_dim = 224
+        self.data = self.load_data(mode, limit)
 
         self.tokenizer = SimpleTokenizer()
         
@@ -32,7 +34,7 @@ class MyDataset(Dataset):
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.RandomHorizontalFlip(),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=int(0.1 * self.image_dim))
+            transforms.GaussianBlur(kernel_size=21),
             transforms.ToTensor(),
             
             ])
@@ -55,7 +57,7 @@ class MyDataset(Dataset):
         data_set=dict()
         if mode in ["train"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')
-            f2= open(os.path.join('/home/chirag/projects/def-sponsor00/chirag/CLIP-MA-MMSD/data/augmented_data (1).json'),'r',encoding='utf-8')
+            f2= open('/content/augmented_data (1).json','r',encoding='utf-8')
             datas = json.load(f1)
             for data in datas:
                 if limit != None and cnt >= limit:
@@ -68,7 +70,7 @@ class MyDataset(Dataset):
                 if os.path.isfile(os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")):
                     data_set[int(cnt)]={"text":sentence, 'label': label, 'image_path': os.path.join(WORKING_PATH,"dataset_image",str(image)+".jpg")}
                     cnt += 1
-            if self.is_augs:
+            if self.is_augs==True:
                 datas_augs = json.load(f2)
                 for data in datas_augs:
                     if limit != None and cnt >= limit:

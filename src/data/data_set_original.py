@@ -24,7 +24,7 @@ class MyDatasetOriginal(Dataset):
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.RandomHorizontalFlip(),
             transforms.RandomGrayscale(p=0.2),
-            transforms.GaussianBlur(kernel_size=int(0.1 * self.image_dim))
+            transforms.GaussianBlur(kernel_size=21)
             ])
         
     

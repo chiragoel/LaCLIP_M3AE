@@ -77,7 +77,7 @@ def train_original(args, model, device, train_data, dev_data, test_data, process
             if not os.path.exists(path_to_save):
                 os.mkdir(path_to_save)
             model_to_save = (model.module if hasattr(model, "module") else model)
-            torch.save(model_to_save.state_dict(), os.path.join(path_to_save, 'model.pt'))
+            torch.save(model_to_save.state_dict(), os.path.join(path_to_save, f'model_{i_epoch}.pt'))
 
             test_acc, test_f1,test_precision,test_recall = evaluate_acc_f1(args, model, device, test_data, processor,macro = True, mode='test')
             _, test_f1_,test_precision_,test_recall_ = evaluate_acc_f1(args, model, device, test_data, processor, mode='test')

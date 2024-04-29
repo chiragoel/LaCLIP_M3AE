@@ -53,12 +53,10 @@ class MV_LaCLIP(nn.Module):
                 nn.GELU()
             )
 
-        self.ln_img_embed1 = nn.LayerNorm(args.image_size)
-        self.ln_text_embed1 = nn.LayerNorm(args.text_size)
-        self.ln_img_embed2 = nn.LayerNorm(args.image_size)
-        self.ln_text_embed2 = nn.LayerNorm(args.text_size)
-        self.text_projection = nn.Linear(args.text_size, args.text_size)
-        self.image_projection = nn.Linear(args.image_size, args.text_size)
+        self.ln_img_embed = nn.LayerNorm(args.image_size)
+        self.ln_text_embed = nn.LayerNorm(args.text_size)
+        self.text_projection = nn.Linear(args.text_size, args.text_size, bias=False)
+        self.image_projection = nn.Linear(args.image_size, args.text_size, bias=False)
         self.classifier_fuse = nn.Linear(args.text_size , args.label_number)
         self.classifier_text = nn.Linear(args.text_size, args.label_number)
         self.classifier_image = nn.Linear(args.image_size, args.label_number)
@@ -72,11 +70,11 @@ class MV_LaCLIP(nn.Module):
         image_features = output['image_features']
         text_feature = output['text_feature']
         image_feature = output['image_feature']
-        text_feature = self.text_linear(self.ln_text_embed1(text_feature))
-        image_feature = self.image_linear(self.ln_img_embed1(image_feature))
+        text_feature = self.text_linear(ext_feature)
+        image_feature = self.image_linear(image_feature)
 
-        text_embeds = self.text_projection(self.ln_text_embed2(text_features))
-        image_embeds = self.image_projection(self.ln_img_embed2(image_features))
+        text_embeds = self.text_projection(self.ln_text_embed(text_features))
+        image_embeds = self.image_projection(self.ln_img_embed(image_features))
         input_embeds = torch.cat((image_embeds, text_embeds), dim=1)
         attention_mask = torch.cat((torch.ones(text_features.shape[0], 50).to(text_features.device), 1.0 - padding_mask), dim=-1)
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)

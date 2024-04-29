@@ -59,8 +59,8 @@ class MMAELaCLIP(nn.Module):
                 nn.Dropout(args.dropout_rate),
                 nn.GELU()
             )
-        self.text_projection = nn.Linear(args.text_size, args.image_size)
-        self.image_projection = nn.Linear(args.image_size, args.image_size)
+        self.text_projection = nn.Linear(args.text_size, args.image_size, bias=False)
+        self.image_projection = nn.Linear(args.image_size, args.image_size, bias=False)
         
         if self.config.use_type_embedding:
             self.encoder_image_type_embedding = nn.Parameter(
@@ -76,10 +76,8 @@ class MMAELaCLIP(nn.Module):
 
         self.encoder = self.load_embed_model(model_type, device, config_updates, layers)
         
-        self.ln_img_embed1 = nn.LayerNorm(args.image_size)
-        self.ln_text_embed1 = nn.LayerNorm(args.text_size)
-        self.ln_img_embed2 = nn.LayerNorm(args.image_size)
-        self.ln_text_embed2 = nn.LayerNorm(args.text_size)
+        self.ln_img_embed = nn.LayerNorm(args.image_size)
+        self.ln_text_embed = nn.LayerNorm(args.text_size)
         self.classifier_fuse = nn.Linear(args.image_size , args.label_number)
         self.classifier_text = nn.Linear(args.text_size, args.label_number)
         self.classifier_image = nn.Linear(args.image_size, args.label_number)
@@ -136,12 +134,12 @@ class MMAELaCLIP(nn.Module):
         
         text_feature = output['text_feature']
         image_feature = output['image_feature']
-        text_feature = self.text_linear(self.ln_text_embed1(text_feature))
-        image_feature = self.image_linear(self.ln_img_embed1(image_feature))
+        text_feature = self.text_linear(text_feature)
+        image_feature = self.image_linear(image_feature)
         
         # Add projection layers text (512->768) and image (768->768)
-        text_features = self.text_projection(self.ln_text_embed2(output['text_features'])) #Remove CLS token
-        image_features = self.image_projection(self.ln_img_embed2(output['image_features']))#[:,1:,:])
+        text_features = self.text_projection(self.ln_text_embed(output['text_features'])) #Remove CLS token
+        image_features = self.image_projection(self.ln_img_embed(output['image_features']))#[:,1:,:])
         # print(text_features.shape, image_features.shape)
         batch_size = image_features.shape[0]
         

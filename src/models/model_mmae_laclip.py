@@ -166,10 +166,10 @@ class MMAELaCLIP(nn.Module):
         # The first token (CLS token) will have the combined info or we can global pool and aggregate info or we can also do it similar to MV_CLIP model where we do weight based aggregation
         
         if self.global_pool=='org':
-            new_text_features = x[:, 50:, :]
-            new_text_feature = new_text_features[
-                torch.arange(new_text_features.shape[0], device=input_ids.device), input_ids.to(torch.int).argmax(dim=-1)
-            ]
+            new_text_feature = x[:, 50:, :].mean(axis=1)
+            # new_text_feature = new_text_features[
+            #     torch.arange(new_text_features.shape[0], device=input_ids.device), input_ids.to(torch.int).argmax(dim=-1)
+            # ]
 
             new_image_feature = x[:, 0, :] #.mean(axis=1)
 

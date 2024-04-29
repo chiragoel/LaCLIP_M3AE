@@ -87,10 +87,10 @@ class MV_LaCLIP(nn.Module):
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
         fuse_hiddens, all_attentions = self.trans(input_embeds, extended_attention_mask, output_all_encoded_layers=False)
         fuse_hiddens = fuse_hiddens[-1]
-        new_text_features = fuse_hiddens[:, 50:, :]
-        new_text_feature = new_text_features[
-            torch.arange(new_text_features.shape[0], device=input_ids.device), input_ids.to(torch.int).argmax(dim=-1)
-        ]
+        new_text_feature = fuse_hiddens[:, 50:, :].mean(axis=1)
+        # new_text_feature = new_text_features[
+        #     torch.arange(new_text_features.shape[0], device=input_ids.device), input_ids.to(torch.int).argmax(dim=-1)
+        # ]
 
         new_image_feature = fuse_hiddens[:, 0, :].squeeze(1)
 

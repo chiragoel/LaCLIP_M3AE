@@ -69,9 +69,7 @@ class MV_CLIP(nn.Module):
                 nn.Dropout(args.dropout_rate),
                 nn.GELU()
             )
-
-        self.ln_img_embed = nn.LayerNorm(args.image_size)
-        self.ln_text_embed = nn.LayerNorm(args.text_size)
+        
         if self.replicate_mmae:
             self.text_projection = nn.Linear(args.text_size, args.image_size, bias=False)
             self.image_projection = nn.Linear(args.image_size, args.image_size, bias=False)
@@ -100,8 +98,8 @@ class MV_CLIP(nn.Module):
         text_feature = self.text_linear(text_feature)
         image_feature = self.image_linear(image_feature)
 
-        text_embeds = self.text_projection(self.ln_text_embed(text_features))
-        image_embeds = self.image_projection(self.ln_img_embed(image_features))
+        text_embeds = self.text_projection(text_features)
+        image_embeds = self.image_projection(image_features)
         input_embeds = torch.cat((image_embeds, text_embeds), dim=1)
         attention_mask = torch.cat((torch.ones(text_features.shape[0], 50).to(text_features.device), 1.0 - padding_mask), dim=-1)
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)

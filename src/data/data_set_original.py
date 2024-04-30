@@ -8,8 +8,7 @@ import transformers
 from PIL import Image
 import torchvision.transforms as transforms
 logger = logging.getLogger(__name__)
-WORKING_PATH="/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/data"
-# WORKING_PATH="/content/drive/MyDrive/MMSD_project/data"
+WORKING_PATH="../dataset"
 
 class MyDatasetOriginal(Dataset):
     def __init__(self, mode, text_name, limit=None, is_augs=False):
@@ -34,7 +33,7 @@ class MyDatasetOriginal(Dataset):
         data_set=dict()
         if mode in ["train"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')
-            f2= open(os.path.join('/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/augmented_data.json'),'r',encoding='utf-8')
+            f2= open(os.path.join(WORKING_PATH, self.text_name, "augmented_data.json"),'r',encoding='utf-8')
             datas = json.load(f1)
             for data in datas:
                 if limit != None and cnt >= limit:

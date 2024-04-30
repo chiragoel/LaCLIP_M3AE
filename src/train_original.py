@@ -25,6 +25,7 @@ def train_original(args, model, device, train_data, dev_data, test_data, process
     train_loader = DataLoader(dataset=train_data,
                               batch_size=args.train_batch_size,
                               collate_fn=MyDatasetOriginal.collate_func,
+                              num_workers=4,
                               shuffle=True)
     total_steps = int(len(train_loader) * args.num_train_epochs)
     model.to(device)
@@ -91,7 +92,7 @@ def train_original(args, model, device, train_data, dev_data, test_data, process
 
 
 def evaluate_acc_f1(args, model, device, data, processor, macro=False,pre = None, mode='test'):
-        data_loader = DataLoader(data, batch_size=args.dev_batch_size, collate_fn=MyDatasetOriginal.collate_func,shuffle=False)
+        data_loader = DataLoader(data, batch_size=args.dev_batch_size, num_workers=4,collate_fn=MyDatasetOriginal.collate_func,shuffle=False)
         n_correct, n_total = 0, 0
         t_targets_all, t_outputs_all = None, None
 

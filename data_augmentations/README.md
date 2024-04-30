@@ -10,25 +10,14 @@ This Python script, `augment_data.py`, is designed to process and augment text d
 - **Sentiment Rewriting**: Utilizes the OpenAI API to rewrite sentences by changing their sentiment, either to sarcasm or its opposite.
 - **API Integration**: Requires an OpenAI API key to function, which should be placed in a text file.
 
-## Requirements
-
-- Python 3.x
-- `openai` Python library
-
 ## Setup
 
-1. **Clone the repository**:
-    ```
-    git clone <repository-url>
-    cd <repository-directory>
-    ```
-
-2. **Install Dependencies**:
+1. **Install Dependencies**:
     ```
     pip install openai
     ```
 
-3. **API Key**:
+2. **API Key**:
     Place your OpenAI API key in a text file. Update the script to read the API key from this file.
 
 ## Usage
@@ -36,7 +25,7 @@ This Python script, `augment_data.py`, is designed to process and augment text d
 - Place your input JSON file containing the original sentences in the project directory.
 - Run the script:
   ```
-  python augment_data.py
+  python augment_data.py --path_api_key=</path/to/api/key> --path_training_dataset=</path/to/training/dataset/> --save_path=</path/to/save/augmented/data>
   ```
 
 ## Input and Output

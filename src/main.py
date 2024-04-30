@@ -75,7 +75,7 @@ def main():
     seed_everything(args.seed)
 
     wandb.init(
-        project="LaClip_MMSD_chirag",
+        project="MV_CLIP_Models",
         notes="mm",
         tags=["mm"],
         config=vars(args),

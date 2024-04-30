@@ -31,7 +31,7 @@ class MyDataset(Dataset):
                                      std=[0.229, 0.224, 0.225])
         if self.mode=='train' and self.is_augs==True:
             self.transform = transforms.Compose([
-            transforms.CenterCrop(size=(self.image_dim, self.image_dim)),
+            transforms.RandomResizedCrop(size=(self.image_dim, self.image_dim), scale=(0.5, 1.0)),
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.RandomHorizontalFlip(),
             transforms.RandomGrayscale(p=0.2),
@@ -42,13 +42,13 @@ class MyDataset(Dataset):
             ])
         elif self.mode=='train':
             self.transform = transforms.Compose([
-                transforms.CenterCrop(size=(self.image_dim, self.image_dim)),
+                transforms.RandomResizedCrop(size=(self.image_dim, self.image_dim), scale=(0.5, 1.0)),
                 transforms.ToTensor(),
                 self.normalize
             ])
         else:
             self.transform = transforms.Compose([
-                transforms.CenterCrop(size=(self.image_dim, self.image_dim)),
+                transforms.RandomResizedCrop(size=(self.image_dim, self.image_dim), scale=(0.5, 1.0)),
                 transforms.ToTensor(),
                 self.normalize
                 

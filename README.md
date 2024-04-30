@@ -1,4 +1,4 @@
-# CLIP-MA-MMSD
+# LaCLIP_M3AE
 This is the codebase for using a multi-view CLIP and ViT based architecture for MultiModal Sarcasm Detection on the MMSD2.0 dataset. This has been motivated from the [paper](https://github.com/JoeYing1019/MMSD2.0/tree/main) "MMSD2.0: Towards a Reliable Multi-modal Sarcasm Detection System". 
 
 In the following, we will guide you how to use this repository step by step.
@@ -26,6 +26,10 @@ You can tun the code in this repo using the following command:
     python3 main.py --model=<model_name> --text_name=<name of text json file> --aug=<Whether to use text based augs or not> --replicate_mmae=<Do you want the ViT to replicate the M3AE model> --num_train_epochs=10 --layers=3 ----output_dir=</path/to/output dir> 
   ```
 An example command can be found in `train.sh`
+
+```angular2html
+    python3 main.py --model=MV_LaCLIP_MMAE --text_name=text_json_final --augs=True --replicate_mmae=True --weight_decay=0.05 --train_batch_size=16 --dev_batch_size=16 --learning_rate=5e-4 --clip_learning_rate=1e-6 --num_train_epochs=10 --layers=3 --max_grad_norm=5 --dropout_rate=0.1 --warmup_proportion=0.2 --device=0 --output_dir=../output_dir
+  ```
 
 We offer the following model implementations in the given repo:
 

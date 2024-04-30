@@ -27,6 +27,10 @@ You can tun the code in this repo using the following command:
   ```
 An example command can be found in `train.sh`
 
+```angular2html
+    python3 main.py --model=MV_LaCLIP_MMAE --text_name=text_json_final --augs=True --replicate_mmae=True --weight_decay=0.05 --train_batch_size=16 --dev_batch_size=16 --learning_rate=5e-4 --clip_learning_rate=1e-6 --num_train_epochs=10 --layers=3 --max_grad_norm=5 --dropout_rate=0.1 --warmup_proportion=0.2 --device=0 --output_dir=../output_dir
+  ```
+
 We offer the following model implementations in the given repo:
 
 - `model_name`: `MV_CLIP_original` - CLIP (open-ai pre-trained) + ViT (BERT) [implementation in the original paper]

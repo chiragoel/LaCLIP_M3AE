@@ -37,18 +37,20 @@ class MyDataset(Dataset):
             transforms.RandomGrayscale(p=0.2),
             transforms.GaussianBlur(kernel_size=21),
             transforms.ToTensor(),
+            self.normalize
             
             ])
         elif self.mode=='train':
             self.transform = transforms.Compose([
                 transforms.CenterCrop(size=(self.image_dim, self.image_dim)),
                 transforms.ToTensor(),
-                
+                self.normalize
             ])
         else:
             self.transform = transforms.Compose([
                 transforms.CenterCrop(size=(self.image_dim, self.image_dim)),
                 transforms.ToTensor(),
+                self.normalize
                 
             ])
 
@@ -116,7 +118,7 @@ class MyDataset(Dataset):
         padding_mask[len(toks):] = 1
         
         image_feature = self.transform(self.image_loader(id))
-        image_feature = self.normalize(image_feature*2 - 1)
+        # image_feature = self.normalize(image_feature*2 - 1)
        
         
         label = self.data[id]["label"]

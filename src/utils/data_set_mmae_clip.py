@@ -39,7 +39,7 @@ class MyDataset(Dataset):
         data_set=dict()
         if mode in ["train"]:
             f1= open(os.path.join(WORKING_PATH, self.text_name ,mode+".json"),'r',encoding='utf-8')
-            f2= open(os.path.join('/home/chirag/projects/def-sponsor00/chirag/CLIP-MA-MMSD/data/augmented_data (1).json'),'r',encoding='utf-8')
+            f2= open(os.path.join('/home/chirag/projects/def-sponsor00/sarcasticcodecrew/MMSD2.0/augmented_data.json'),'r',encoding='utf-8')
             datas = json.load(f1)
             for data in datas:
                 image = data['image_id']

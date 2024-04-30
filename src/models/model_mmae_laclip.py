@@ -138,7 +138,7 @@ class MMAECLIP(nn.Module):
             return 0.0
 
     def forward(self, image, text, padding_mask, input_ids, labels, deterministic=False):
-        output = self.model(image, text, padding_mask)
+        output = self.model(image, text)
         
         text_feature = output['text_feature']
         image_feature = output['image_feature']

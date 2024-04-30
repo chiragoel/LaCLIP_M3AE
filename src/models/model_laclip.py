@@ -90,7 +90,7 @@ class MV_CLIP(nn.Module):
             self.att = nn.Linear(args.text_size, 1, bias=False)
 
     def forward(self, image, text, padding_mask, input_ids, labels):
-        output = self.model(image, text, padding_mask) 
+        output = self.model(image, text) 
         text_features = output['text_features']
         image_features = output['image_features']
         text_feature = output['text_feature']

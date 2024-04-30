@@ -29,6 +29,7 @@ An example command can be found in `train.sh`
 
 We offer the following model implementations in the given repo:
 
+- `model_name`: `MV_CLIP_original` - CLIP (open-ai pre-trained) + ViT (BERT) [implementation in the original paper]
 - `model_name`: `MV_CLIP` - CLIP (LAION pre-trained) + ViT (BERT)
 - `model_name`: `MV_LaCLIP` - LaCLIP (LAION pre-trained) + ViT (BERT)
 - `model_name`: `MV_CLIP_MMAE` - CLIP (LAION pre-trained) + M3AE

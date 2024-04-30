@@ -42,4 +42,4 @@ You can also set different flags like:
 - `layers`: Number of transformer blocks to use for the classifier model
 - `max_length`: The maximum number of text tokens
 
- Feel free to play around with other flags.
+ Feel free to play around with other flags and hyperparameters

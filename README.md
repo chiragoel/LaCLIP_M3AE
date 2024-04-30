@@ -18,6 +18,23 @@ We recommend to use a python enviroment with python `3.9` for these experiments.
 
 Please download the dataset from the readme [here](https://github.com/JoeYing1019/MMSD2.0/tree/main) and put it in the `dataset` folder. The text json files are already present. Please modify the `WORKING_DIR` path in the `data_set.py` and `data_set_original.py` file according to where the `dataset` folder is present.
 
+## Data Augmentations
+
+Open-ai GPT3.5 api has been used for creating our text augmented dataset. If you plan to use this be mindful that this would incur costs according to OpenAI's pricing model. This is an offline step acan be run in the following manner:
+
+### Requirements
+
+```angular2html
+    pip install openai 
+  ```
+
+### Usage
+```
+  python augment_data.py --path_api_key=</path/to/api/key> --path_training_dataset=</path/to/training/dataset/> --save_path=</path/to/save/augmented/data>
+  ```
+
+For more details see [here](https://github.com/chiragoel/LaCLIP_M3AE/blob/main-chirag-final/data_augmentations/README.md)
+
 ## Usage
 
 You can tun the code in this repo using the following command:

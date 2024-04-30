@@ -1,4 +1,4 @@
-# CLIP-MA-MMSD
+# LaCLIP_M3AE
 This is the codebase for using a multi-view CLIP and ViT based architecture for MultiModal Sarcasm Detection on the MMSD2.0 dataset. This has been motivated from the [paper](https://github.com/JoeYing1019/MMSD2.0/tree/main) "MMSD2.0: Towards a Reliable Multi-modal Sarcasm Detection System". 
 
 In the following, we will guide you how to use this repository step by step.

@@ -37,7 +37,7 @@ For more details see [here](https://github.com/chiragoel/LaCLIP_M3AE/blob/main-c
 
 ## Usage
 
-Plase download the pre-trained model weights for LaCLIP and M3AE from [here](https://drive.google.com/file/d/1-4f9bDb-0S-Ei7_Tf7_rcUrR5KmUbFht/view?usp=sharing)
+Plase download the pre-trained model weights for LaCLIP and M3AE from [here](https://drive.google.com/file/d/1-4f9bDb-0S-Ei7_Tf7_rcUrR5KmUbFht/view?usp=sharing) and add them to the `src` folder. The final structure should look like `src->model_weights`.
 
 You can tun the code in this repo using the following command:
 

@@ -9,8 +9,8 @@ We recommend to use a python enviroment with python `3.9` for these experiments.
 
  ```angular2html
     python -m venv /path/to/new/virtual/environment
-    pip install -r requirements.txt
     source /path/to/new/virtual/environment/bin/activate
+    pip install -r requirements.txt
     cd src  
   ```
 
@@ -36,6 +36,8 @@ Open-ai GPT3.5 api has been used for creating our text augmented dataset. If you
 For more details see [here](https://github.com/chiragoel/LaCLIP_M3AE/blob/main-chirag-final/data_augmentations/README.md)
 
 ## Usage
+
+Plase download the pre-trained model weights for LaCLIP and M3AE from [here](https://drive.google.com/file/d/1-4f9bDb-0S-Ei7_Tf7_rcUrR5KmUbFht/view?usp=sharing)
 
 You can tun the code in this repo using the following command:
 
